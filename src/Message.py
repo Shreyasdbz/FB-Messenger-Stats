@@ -14,3 +14,4 @@ class Message:
         self.photo = photo
         self.gif = gif
         self.sticker = sticker
+        self.conversation = ""

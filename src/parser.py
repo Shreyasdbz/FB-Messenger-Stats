@@ -15,6 +15,7 @@ path = "../"
 class Parser:
     def __init__(self, debug):
         self.debug = debug
+        self.dirPath = ""
         self.fileNames = []
         self.chatName = ""
         self.chatParticipants = []
@@ -22,89 +23,114 @@ class Parser:
         self.avoid_messages = ['asdf']
 
     #------------------------------------------------------------------------------------------------------
+    # Sets the path of the conversation director to parse
+    #------------------------------------------------------------------------------------------------------
+    def setDirPath(self, dirPath):
+        self.dirPath = dirPath
+
+    #------------------------------------------------------------------------------------------------------
     # Get all the conversation history files
     #------------------------------------------------------------------------------------------------------
     def setFileNames(self):
         if(self.debug == "DEBUG"):
             print("Parser:::Entered setFileNames()")
-        for i in os.listdir("Data/messages/groupChat"):
+        for i in os.listdir("Data/messages/inbox/" + self.dirPath):
             if i.endswith('.json'):
                 self.fileNames.append(i)
 
     #------------------------------------------------------------------------------------------------------
     # Import Data from the files
     #------------------------------------------------------------------------------------------------------
-    def importFileContent(self):
+    def importFileContent(self, conversationList):
         if(self.debug == "DEBUG"):
             print("Parser:::Entered importFileContent()")
-        for f in self.fileNames:
-            filePath = "Data/messages/groupChat/" + f
-            with open(filePath) as j:
-                data = json.load(j)
+            
+        for convo in conversationList:
+            if convo.folderName == self.dirPath:
 
-                #Import Participants ------------------------------------------------
-                for i in data['participants']:
-                    for person in i:
-                        exists = False
-                        for participant_obj in self.chatParticipants:
-                            if i[person] == participant_obj.name:
-                                exists = True
-                        if(exists == True):
-                            exists = False
-                        else:
-                            self.chatParticipants.append(Participant(i[person]))
-                            # if(self.debug == "DEBUG"):
-                            #    print("Parser::: importFileContent() ::: Import Participants ::: " , i[person])
+                for f in self.fileNames:
+                    filePath = "Data/messages/inbox/" + self.dirPath + "/" + f
 
-                #Import Messages ------------------------------------------------
-                for m in data['messages']:
-                    sender = ""
-                    timeStamp = 0
-                    content = ""
-                    contentType = ""
-                    photo_uri = ""
-                    gifs_uri = ""
-                    sticker_uri = ""
+                    with open(filePath) as j:
+                        data = json.load(j)
+                        if(self.debug == "DEBUG"):
+                            print("Parser:::importfileContent():::readingFile: ", filePath)
 
-                    for msgData in m:
-                        if(msgData == "sender_name"):
-                            sender = m[msgData]
-                        if(msgData == "timestamp_ms"):
-                            timeStamp = m[msgData]
-                        if(msgData == "content"):
-                            content = m[msgData]
-                        if(msgData == "photos"):
-                            for photoData in msgData:
-                                if(photoData == "uri"):
-                                    photo_uri = msgData[photoData]
-                        if(msgData == "gifs"):
-                            for photoData in msgData:
-                                if(photoData == "uri"):
-                                    gifs_uri = msgData[photoData]
-                        if(msgData == "sticker"):
-                            for photoData in msgData:
-                                if(photoData == "uri"):
-                                    sticker_uri = msgData[photoData]
-                        if(msgData == "type"):
-                            contentType = m[msgData]
+                        #Import Participants ------------------------------------------------
+                        for i in data['participants']:
+                            for person in i:
+                                exists = False
+                                for participant_obj in self.chatParticipants:
+                                    if i[person] == participant_obj.name:
+                                        exists = True
+                                if(exists == True):
+                                    exists = False
+                                else:
+                                    self.chatParticipants.append(Participant(i[person]))
+                                    if(self.debug == "DEBUG"):
+                                       print("Parser::: importFileContent() ::: Import Participants ::: " , i[person])
+                        
+                        #Import Messages ------------------------------------------------
+                        for m in data['messages']:
+                            sender = ""
+                            timeStamp = 0
+                            content = ""
+                            contentType = ""
+                            photo_uri = ""
+                            gifs_uri = ""
+                            sticker_uri = ""
 
-                    #Append to overall Message object array
-                    self.messages.append(Message(sender, timeStamp, content, photo_uri, gifs_uri, sticker_uri))                    
+                            for msgData in m:
+                                if(msgData == "sender_name"):
+                                    sender = m[msgData]
+                                if(msgData == "timestamp_ms"):
+                                    timeStamp = m[msgData]
+                                if(msgData == "content"):
+                                    content = m[msgData]
+                                if(msgData == "photos"):
+                                    # for photoData in msgData:
+                                    for photoData in m['photos']:
+                                            photo_uri = photoData['uri']
+                                '''
+                                if(msgData == "gifs"):
+                                    # for photoData in msgData:
+                                    for photoData in m['gifs']:
+                                            gifs_uri = photoData['uri']
+                                if(msgData == "sticker"):
+                                    # for photoData in msgData:
+                                    for photoData in m['sticker']:
+                                            sticker_uri = photoData['uri']
+                                '''
+                                if(msgData == "type"):
+                                    contentType = m[msgData]
 
-                    #Append to each participant's Participant object
-                    for participant_obj in self.chatParticipants:
-                        if participant_obj.name == sender:
-                            participant_obj.timeStamps.append(timeStamp)
-                            participant_obj.contentType.append(contentType)                                
-                            if(content not in self.avoid_messages):                                    
-                                participant_obj.messages.append(content)
-                            if(photo_uri != ""):
-                                participant_obj.photosCount += 1
-                            if(gifs_uri != ""):
-                                participant_obj.gifsCount += 1
-                            if(sticker_uri != ""):
-                                participant_obj.stickersCount += 1
-                            
+                            #Append to overall Message object array
+                            self.messages.append(Message(sender, timeStamp, content, photo_uri, gifs_uri, sticker_uri))                    
+
+                            #Check if sender is in participants list
+                            # Participants who have left the chat don't show up in the default participants
+                            existingNames = []
+                            for participant_obj in self.chatParticipants:
+                                existingNames.append(participant_obj.name)
+                            if sender not in existingNames:
+                                self.chatParticipants.append(Participant(sender))
+
+                            #Append to each participant's Participant object
+                            for participant_obj in self.chatParticipants:
+                                if participant_obj.name == sender:
+                                    participant_obj.timeStamps.append(timeStamp)
+                                    participant_obj.contentType.append(contentType)                                
+                                    if(content not in self.avoid_messages):                                    
+                                        participant_obj.messages.append(content)
+                                    if(photo_uri != ""):
+                                        participant_obj.photosCount += 1
+                                    if(gifs_uri != ""):
+                                        participant_obj.gifsCount += 1
+                                    if(sticker_uri != ""):
+                                        participant_obj.stickersCount += 1
+
+                convo.participantList = self.chatParticipants
+                convo.getMessageList = self.messages                    
 
     #------------------------------------------------------------------------------------------------------
     # Return an array of Participant objects

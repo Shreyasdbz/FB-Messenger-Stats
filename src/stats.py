@@ -3,9 +3,6 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from Participant import Participant
-
-path = "../"
 
 #############################################################################################################
 #
@@ -15,17 +12,22 @@ path = "../"
 #
 ############################################################################################################
 class Stats:
-    def __init__(self):
-        self.participantList = []
-        self.messageList = []
-
-    #------------------------------------------------------------------------------------------------------
-    # Set parsed data to appropriate lists
-    #------------------------------------------------------------------------------------------------------
-    def setData(self, participantList, messageList):
-        self.participantList = participantList
-        self.messageList = messageList
-
+    def __init__(self, conversation):
+        self.conversation = conversation
+        self.participantList = conversation.participantList
+        self.messageList = conversation.messageList
+        self.title = conversation.title
+        
+    ####
+    # Stats ideas:
+    #   Messages per user bar graph / pie chart
+    #   Word cloud for most used words
+    #   Stacked bar graphs for messages, pics, gifs and stickers per user
+    #   Time chat is most active
+    #   Time user is most active
+    #   Most reacts
+    #   Most emojis
+    ####
 
     #------------------------------------------------------------------------------------------------------
     # Generates a plot of messages sent by each user in a chat
@@ -37,12 +39,13 @@ class Stats:
         for participant in self.participantList:
             name_words = str.split(participant.name)
             names.append(name_words[0])      
+            # names.append(participant.name)      
             messages.append(len(participant.messages))    
 
         fig, ax = plt.subplots()
         y_pos = np.arange(len(names))
         plt.bar(y_pos, messages) 
-        plt.xticks(y_pos, names)
+        plt.xticks(y_pos, names, wrap=True)
         rect = plt.bar(y_pos, messages)
 
         for idx,rect in enumerate(rect):
@@ -77,6 +80,6 @@ class Stats:
     # print stuff
     #------------------------------------------------------------------------------------------------------
     def printStuff(self):
-#        self.messagesPerUser()
+        # self.messagesPerUser()
         self.wordCloud()
         pass
