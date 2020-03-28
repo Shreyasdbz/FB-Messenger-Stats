@@ -19,7 +19,7 @@ class Parser:
         self.chatName = ""
         self.chatParticipants = []
         self.messages = []
-        self.avoid_messages = ['You sent an atachment','']
+        self.avoid_messages = ['asdf']
 
     #------------------------------------------------------------------------------------------------------
     # Get all the conversation history files
@@ -62,6 +62,9 @@ class Parser:
                     timeStamp = 0
                     content = ""
                     contentType = ""
+                    photo_uri = ""
+                    gifs_uri = ""
+                    sticker_uri = ""
 
                     for msgData in m:
                         if(msgData == "sender_name"):
@@ -70,12 +73,23 @@ class Parser:
                             timeStamp = m[msgData]
                         if(msgData == "content"):
                             content = m[msgData]
+                        if(msgData == "photos"):
+                            for photoData in msgData:
+                                if(photoData == "uri"):
+                                    photo_uri = msgData[photoData]
+                        if(msgData == "gifs"):
+                            for photoData in msgData:
+                                if(photoData == "uri"):
+                                    gifs_uri = msgData[photoData]
+                        if(msgData == "sticker"):
+                            for photoData in msgData:
+                                if(photoData == "uri"):
+                                    sticker_uri = msgData[photoData]
                         if(msgData == "type"):
                             contentType = m[msgData]
 
                     #Append to overall Message object array
-                    if(content != ""):
-                        self.messages.append(Message(sender, timeStamp, content, "", "", ""))                    
+                    self.messages.append(Message(sender, timeStamp, content, photo_uri, gifs_uri, sticker_uri))                    
 
                     #Append to each participant's Participant object
                     for participant_obj in self.chatParticipants:
@@ -84,6 +98,13 @@ class Parser:
                             participant_obj.contentType.append(contentType)                                
                             if(content not in self.avoid_messages):                                    
                                 participant_obj.messages.append(content)
+                            if(photo_uri != ""):
+                                participant_obj.photosCount += 1
+                            if(gifs_uri != ""):
+                                participant_obj.gifsCount += 1
+                            if(sticker_uri != ""):
+                                participant_obj.stickersCount += 1
+                            
 
     #------------------------------------------------------------------------------------------------------
     # Return an array of Participant objects

@@ -10,7 +10,7 @@ class Participant:
         self.name = name
         self.timeStamps = []
         self.messages = []
-        self.sticker = 0
-        self.photos = 0
-        self.gifs = 0
+        self.stickersCount = 0
+        self.photosCount = 0
+        self.gifsCount = 0
         self.contentType = []
