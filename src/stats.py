@@ -2,6 +2,8 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
+import pandas as pd
 from wordcloud import WordCloud
 
 #############################################################################################################
@@ -13,6 +15,7 @@ from wordcloud import WordCloud
 ############################################################################################################
 class Stats:
     def __init__(self, conversation):
+        self.debug = ""
         self.conversation = conversation
         self.participantList = conversation.participantList
         self.messageList = conversation.messageList
@@ -35,28 +38,32 @@ class Stats:
     def  messagesPerUser(self):
         names = []
         messages = []
+        photos = []
+        gifs = []
+        total = []
 
         for participant in self.participantList:
             name_words = str.split(participant.name)
             names.append(name_words[0])      
             # names.append(participant.name)      
             messages.append(len(participant.messages))    
+            photos.append(participant.photosCount)  
+            gifs.append(participant.gifsCount) 
+            temp_num = len(participant.messages) + participant.photosCount + participant.gifsCount + participant.stickersCount
+            total.append(temp_num)
 
         fig, ax = plt.subplots()
         y_pos = np.arange(len(names))
-        plt.bar(y_pos, messages) 
-        plt.xticks(y_pos, names, wrap=True)
-        rect = plt.bar(y_pos, messages)
+        plt.bar(y_pos, total, align='edge', width=0) 
+        plt.xticks(y_pos, names, wrap=True, fontsize=8)
+        rect = plt.bar(y_pos, total)
 
         for idx,rect in enumerate(rect):
             height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width()/2., 1.01*height,
-                    messages[idx],
-                    ha='center', va='bottom', rotation=0)
+            ax.text(rect.get_x() + rect.get_width()/2., 1.01*height, total[idx], ha='center', va='bottom', rotation=0)
 
         plt.title('Number of messages sent by each user')
         plt.show()
-
 
     #------------------------------------------------------------------------------------------------------
     # Generates a word cloud of the most used words in a chat
@@ -76,10 +83,22 @@ class Stats:
         plt.show()
         
         
+
+    #------------------------------------------------------------------------------------------------------
+    # Shows overall chat statsitics like messages & photos sent, time most active, Date Created
+    #------------------------------------------------------------------------------------------------------
+    def chatStats(self):
+
+        if(self.debug == "DEBUG"):
+            print("Stats:::Entered chatStats()")
+
+        pass
+
+
     #------------------------------------------------------------------------------------------------------
     # print stuff
     #------------------------------------------------------------------------------------------------------
     def printStuff(self):
-        # self.messagesPerUser()
-        self.wordCloud()
+        self.messagesPerUser()
+        # self.wordCloud()
         pass

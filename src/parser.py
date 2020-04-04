@@ -1,7 +1,7 @@
 import os
 import json
-from Participant import Participant
-from Message import Message
+from src import Participant
+from src import Message
 
 path = "../"
 
@@ -66,7 +66,7 @@ class Parser:
                                 if(exists == True):
                                     exists = False
                                 else:
-                                    self.chatParticipants.append(Participant(i[person]))
+                                    self.chatParticipants.append(Participant.Participant(i[person]))
                                     if(self.debug == "DEBUG"):
                                        print("Parser::: importFileContent() ::: Import Participants ::: " , i[person])
                         
@@ -88,24 +88,20 @@ class Parser:
                                 if(msgData == "content"):
                                     content = m[msgData]
                                 if(msgData == "photos"):
-                                    # for photoData in msgData:
                                     for photoData in m['photos']:
-                                            photo_uri = photoData['uri']
-                                '''
+                                        photo_uri = photoData['uri']
                                 if(msgData == "gifs"):
-                                    # for photoData in msgData:
                                     for photoData in m['gifs']:
-                                            gifs_uri = photoData['uri']
+                                        gifs_uri = photoData['uri']
                                 if(msgData == "sticker"):
-                                    # for photoData in msgData:
                                     for photoData in m['sticker']:
-                                            sticker_uri = photoData['uri']
-                                '''
+                                        pass
+                                        # sticker_uri = photoData['uri']
                                 if(msgData == "type"):
                                     contentType = m[msgData]
 
                             #Append to overall Message object array
-                            self.messages.append(Message(sender, timeStamp, content, photo_uri, gifs_uri, sticker_uri))                    
+                            self.messages.append(Message.Message(sender, timeStamp, content, photo_uri, gifs_uri, sticker_uri))                    
 
                             #Check if sender is in participants list
                             # Participants who have left the chat don't show up in the default participants
@@ -113,7 +109,7 @@ class Parser:
                             for participant_obj in self.chatParticipants:
                                 existingNames.append(participant_obj.name)
                             if sender not in existingNames:
-                                self.chatParticipants.append(Participant(sender))
+                                self.chatParticipants.append(Participant.Participant(sender))
 
                             #Append to each participant's Participant object
                             for participant_obj in self.chatParticipants:
@@ -131,6 +127,7 @@ class Parser:
 
                 convo.participantList = self.chatParticipants
                 convo.getMessageList = self.messages                    
+
 
     #------------------------------------------------------------------------------------------------------
     # Return an array of Participant objects

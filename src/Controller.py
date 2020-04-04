@@ -1,8 +1,8 @@
 import os
 import json
-from Parser import Parser
-from Stats import Stats
-from Conversation import Conversation
+from src import Parser
+from src import Stats
+from src import Conversation
 
 path = "../"
 
@@ -15,7 +15,7 @@ path = "../"
 ############################################################################################################
 class Controller:
     def __init__(self):
-        self.parser = Parser("")
+        self.parser = Parser.Parser("")
         self.participantList = []
         self.messageList = []
         self.conversationList = []
@@ -37,7 +37,7 @@ class Controller:
                 data = json.load(f)
                 for i in data:
                     if i == "title":
-                        self.conversationList.append(Conversation(data['title'], convo))
+                        self.conversationList.append(Conversation.Conversation(data['title'], convo))
                         
     #------------------------------------------------------------------------------------------------------
     # Runs all the needed methods
@@ -73,7 +73,7 @@ class Controller:
     def statOps(self):
         for convo in self.conversationList:
             if(convo.folderName == self.dirPath):
-                stat = Stats(convo)
+                stat = Stats.Stats(convo)
                 stat.printStuff()
 
 
@@ -89,7 +89,7 @@ class Controller:
 
 
 
-test = Controller()
-test.setDirPath("ohJ6e3Zymg")
-#soccer: ohJ6e3Zymg
-test.runStuff()
+#Parkland Chat:
+#test.setDirPath("Isweartogodwerenormalpeople_Rs3jzQUoVA")
+#soccer chat:
+#test.setDirPath("ohJ6e3Zymg")
