@@ -38,6 +38,7 @@ class main():
     convoNum = int(input("Enter your selection: ")) - 1
     app.setDirPath(conversationList[convoNum].folderName)
     app.runStuff()
+
     #Get Data
 
 

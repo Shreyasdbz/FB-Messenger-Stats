@@ -100,5 +100,5 @@ class Stats:
     #------------------------------------------------------------------------------------------------------
     def printStuff(self):
         self.messagesPerUser()
-        # self.wordCloud()
+        self.wordCloud()
         pass
